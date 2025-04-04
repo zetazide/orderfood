@@ -2,58 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Simple Food Order</title>
+  <title>Simple Order Page</title>
   <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 2rem auto; }
+    body { font-family: sans-serif; max-width: 400px; margin: 2rem auto; }
     input, button { margin: 0.5rem 0; padding: 0.5rem; width: 100%; }
-    .items { margin-top: 1rem; }
     label { display: block; margin: 0.3rem 0; }
   </style>
 </head>
 <body>
 
-  <h2>Order Your Food</h2>
+  <h2>Order Food</h2>
 
   <label>
     Personal Number:
     <input type="text" id="personalNumber" placeholder="e.g., 123456" />
   </label>
 
-  <div class="items">
-    <strong>Select Items:</strong>
-    <label><input type="checkbox" value="Burger" class="item"> Burger</label>
-    <label><input type="checkbox" value="Pizza" class="item"> Pizza</label>
-    <label><input type="checkbox" value="Fries" class="item"> Fries</label>
-    <label><input type="checkbox" value="Coke" class="item"> Coke</label>
-  </div>
+  <label><input type="checkbox" value="Eggs" class="item"> Eggs</label>
+  <label><input type="checkbox" value="Coffee" class="item"> Coffee</label>
 
   <button onclick="checkout()">Checkout</button>
 
-  <pre id="orderSummary" style="margin-top:1rem; background:#f0f0f0; padding:1rem;"></pre>
-
   <script>
-    function checkout() {
+    async function checkout() {
       const number = document.getElementById("personalNumber").value.trim();
       const selectedItems = [...document.querySelectorAll(".item:checked")]
-                            .map(item => item.value);
+        .map(item => item.value);
 
       if (!number || selectedItems.length === 0) {
-        alert("Please enter personal number and select at least one item.");
+        alert("Please enter your number and select at least one item.");
         return;
       }
 
       const order = {
         personalNumber: number,
-        items: selectedItems,
-        time: new Date().toLocaleString()
+        items: selectedItems
       };
 
-      // For demo: show order summary to user
-      document.getElementById("orderSummary").textContent =
-        "Order placed:\n" + JSON.stringify(order, null, 2);
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbxkOn_9IAs2TIg2kYxKzBhe7wTevnALjjsRyKEqubDy6dMLHBgWVRP24oJItMaHMwu9yA/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(order)
+        });
 
-      // 👉 You can send this to a backend / Google Sheets / Firebase etc.
-      console.log("Send to chef:", order);
+        if (response.ok) {
+          alert("Order sent to chef!");
+        } else {
+          throw new Error("Server error");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to send order.");
+      }
     }
   </script>
 
